@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>식당 정보 추천</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-top: 20px;
+        }
+        
+        .container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .infoContainer {
+            text-align: left;
+            margin-right: 30px;
+        }
+        
+        .infoContainer p {
+            margin: 10px 0;
+        }
+        
+        #imageContainer {
+            flex: 1;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            flex-direction: column;
+        }
+        
+        #imageContainer img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        #mapContainer {
+            flex: 1;
+            width: 100%;
+            height: 400px;
+            margin-top: 20px;
+        }
+        
+        #randomButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+
+        .infoContainer {
+            text-align: left;
+            margin-right: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .infoContainer h1 {
+            display: flex;
+            align-items: center;
+        }
+
+        .infoContainer h1 span {
+            font-size: 14px;
+            margin-left: 10px;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        var allTextLines;
+        var headers;
+        var imageColumnIndex;
+        var placetitleColumnIndex;
+        var typesColumnIndex;
+        var rateColumnIndex;
+        var addressColumnIndex;
+
+        $(document).ready(function(){
+            $.ajax({
+                type: "GET",
+                url: "전남대상대맛집.csv",
+                dataType: "text",
+                success: function(data) {
+                    processData(data);
+                    showRandomImage();
+                }
+            });
+
+            $("#randomButton").click(function() {
+                showRandomImage();
+            });
+        });
+
+        function processData(allText) {
+            allTextLines = allText.split(/\r\n|\n/);
+            headers = allTextLines[0].split(',');
+            imageColumnIndex = headers.indexOf("image");
+            placetitleColumnIndex = headers.indexOf("placetitle");
+            typesColumnIndex = headers.indexOf("types");
+            rateColumnIndex = headers.indexOf("rate");
+            addressColumnIndex = headers.indexOf("address");
+        }
+
+        function showRandomImage() {
+            var randomIndex = Math.floor(Math.random() * (allTextLines.length - 1)) + 1;
+            var rowData = allTextLines[randomIndex].split(',');
+            var imageURL = rowData[imageColumnIndex];
+            var placetitle = rowData[placetitleColumnIndex];
+            var types = rowData[typesColumnIndex];
+            var rate = rowData[rateColumnIndex];
+            var address = rowData[addressColumnIndex];
+
+            // 이미지를 화면에 표시하는 코드
+            var img = document.createElement("img");
+            img.src = imageURL;
+            img.alt = placetitle;
+            document.getElementById("imageContainer").innerHTML = "";
+            document.getElementById("imageContainer").appendChild(img);
+
+            // 정보를 화면에 표시하는 코드
+            var infoContainer = document.getElementById("infoContainer");
+            infoContainer.innerHTML = "";
+            var placetitleElement = document.createElement("h1");
+            placetitleElement.textContent = " " + placetitle;
+            infoContainer.appendChild(placetitleElement);
+            var typesElement = document.createElement("p");
+            typesElement.textContent = " " + types;
+            infoContainer.appendChild(typesElement);
+            var rateElement = document.createElement("p");
+            rateElement.textContent = "평점: " + rate;
+            infoContainer.appendChild(rateElement);
+            var addressElement = document.createElement("p");
+            addressElement.textContent = "주소: " + address;
+            infoContainer.appendChild(addressElement);
+
+            // 지도 정보를 표시하는 코드
+            var mapContainer = document.getElementById("mapContainer");
+            mapContainer.innerHTML = "";
+            var map = document.createElement("iframe");
+            map.src = "https://www.google.com/maps?q=" + encodeURIComponent(address) + "&output=embed";
+            map.width = "100%";
+            map.height = "100%";
+            mapContainer.appendChild(map);
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="infoContainer" id="infoContainer"></div>
+        <div id="imageContainer"></div>
+    </div>
+    <div id="mapContainer"></div>
+    <button id="randomButton">랜덤 이미지 보기</button>
+</body>
+</html>
